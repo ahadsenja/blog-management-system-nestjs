@@ -11,35 +11,42 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique
-  password  String
-  name      String
-  posts     Post[]
+  uuid       String    @id @default(uuid())
+  email      String    @unique
+  password   String
+  name       String
+  posts      Post[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 }
 
 model Post {
-  id          Int                 @id @default(autoincrement())
+  uuid        String              @id @default(uuid())
   title       String              
   content     String
-  author      User                @relation(fields: [authorId], references: [id])
-  authorId    Int
+  author      User                @relation(fields: [authorId], references: [uuid])
+  authorId    String
   imageUrl    String?
   published   Boolean             @default(false)
   categories  CategoryOnPost[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
 }
 
 model Category {
-  id      Int               @id @default(autoincrement())
-  name    String            @unique
-  posts   CategoryOnPost[]
+  uuid        String            @id @default(uuid())
+  name        String            @unique
+  posts       CategoryOnPost[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 }
 
 model CategoryOnPost {
-  postId        Int
-  post          Post        @relation(fields: [postId], references: [id])
-  categoryId    Int
-  category      Category    @relation(fields: [categoryId], references: [id])
-
+  postId        String
+  post          Post          @relation(fields: [postId], references: [uuid])
+  categoryId    String
+  category      Category      @relation(fields: [categoryId], references: [uuid])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   @@id([postId, categoryId])
 }
