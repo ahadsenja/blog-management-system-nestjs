@@ -1,7 +1,7 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { CreateUserDTO } from 'src/dto/create-user.dto';
 import { PrismaService } from '../services/prisma.service';
-import { User } from '@prisma/client';
+import { User, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -43,5 +43,35 @@ export class UsersService {
             name: data.name,
         }
     })
+  }
+
+   // Update existing user
+   async updateUser(uuid: string, data: Prisma.UserUpdateInput): Promise<User> {
+    const user = await this.prisma.user.findUnique({ where: { uuid } });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${uuid} not found`);
+    }
+
+    if (typeof data.password === 'string') {
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+      data.password = hashedPassword;
+    }
+
+    return this.prisma.user.update({
+      where: { uuid },
+      data,
+    });
+  }
+
+  // Delete existing user
+  async deleteUser(uuid: string): Promise<User> {
+    const user = await this.prisma.user.findUnique({ where: { uuid } });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${uuid} not found`);
+    }
+
+    return this.prisma.user.delete({ where: { uuid } });
   }
 }
